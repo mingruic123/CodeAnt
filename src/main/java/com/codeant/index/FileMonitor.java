@@ -3,9 +3,9 @@ package main.java.com.codeant.index;
 import main.java.com.codeant.index.Index;
 
 /**
- * Created by Mingrui on 8/22/2017.
+ * MOnitor a directory for any added files and ask indexer to index new files automatically if automatic indexing is set to true
  */
-public class FileMonitor implements Index {
+public class FileMonitor{
     public void addToIndex(){
     //
     }

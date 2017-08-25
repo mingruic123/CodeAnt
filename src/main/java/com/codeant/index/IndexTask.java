@@ -1,7 +1,9 @@
 package main.java.com.codeant.index;
 
+import main.java.com.codeant.common.FileItem;
 import main.java.com.codeant.common.Item;
 import main.java.com.codeant.common.ItemFactory;
+import main.java.com.codeant.common.ItemType;
 
 import java.io.IOException;
 

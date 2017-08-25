@@ -8,6 +8,7 @@ public class FileItem extends Item {
 
     public FileItem(String path){
         this.absolutePath = path;
+        this.type = ItemType.FILE;
     }
 
     public void setFileType(String fileType){

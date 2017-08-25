@@ -13,7 +13,10 @@ import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by Mingrui on 8/24/2017.
+ *
+ * An index Service is to create a service for indexing. Once service is started, users can index documents.
+ * It is created as a Singleton in order to guarantee only one index service is running.
+ *
  */
 public final class IndexService {
     private String indexPath;
@@ -22,11 +25,24 @@ public final class IndexService {
     private IndexWriterConfig iwc;
     private LuceneIndexer luceneIndexer;
     private AtomicBoolean initialized = new AtomicBoolean(false);
+    private AtomicBoolean serviceStatus = new AtomicBoolean(false);
     private static String DEFAULT_INDEX_DIR = "index";
 
-    public IndexService(String indexPath, String docsPath){
+    private static IndexService serviceInstance = null;
+    private IndexService(String indexPath){
         this.indexPath = indexPath.length() != 0 ? indexPath : DEFAULT_INDEX_DIR;
         init();
+    }
+
+    /**
+     * A singleton method to get instance of index service.
+     * @param indexPath The directory where index is saved
+     */
+    public static IndexService getIndexServiceInstance(String indexPath){
+        if(serviceInstance == null){
+            serviceInstance = new IndexService(indexPath);
+        }
+        return serviceInstance;
     }
 
     private void init(){
@@ -45,7 +61,8 @@ public final class IndexService {
 
     public void start() {
         if(initialized.equals(true)){
-            luceneIndexer = new LuceneIndexer(dir, analyzer, iwc);
+            luceneIndexer = new LuceneIndexer(dir, iwc);
+            serviceStatus.set(true);
         }else{
             System.err.println("Index is not initialized!");
         }
@@ -53,6 +70,18 @@ public final class IndexService {
 
     public LuceneIndexer getLuceneIndexer(){
         return this.luceneIndexer;
+    }
+
+    public Analyzer getIndexAnalyzer(){
+        return this.analyzer;
+    }
+
+    public boolean isStarted(){
+        return serviceStatus.equals(true);
+    }
+
+    public boolean isStopped(){
+        return serviceStatus.equals(false);
     }
 
     public void stop() throws IOException{

@@ -8,5 +8,5 @@ import java.io.IOException;
  * Created by Mingrui on 8/24/2017.
  */
 public interface Indexer {
-    void index(Item item) throws IOException;
+    boolean index(Item item) throws IOException;
 }

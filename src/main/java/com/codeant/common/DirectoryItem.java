@@ -9,6 +9,7 @@ public class DirectoryItem extends Item {
 
     public DirectoryItem(String path){
         this.absolutePath = path;
+        this.type = ItemType.DIRECTORY;
     }
 
     private List<File> allFiles = null;

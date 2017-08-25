@@ -1,6 +1,7 @@
 package main.java.com.codeant.Bootstrap;
 
 import main.java.com.codeant.index.IndexService;
+import main.java.com.codeant.index.IndexTask;
 
 /**
  * Entry point of CodeAnt when starting from command line
@@ -37,8 +38,18 @@ public class CodeAnt {
         Start a new task to index
          */
         if(function.equals("index")){
-            IndexService newIndexTask = new IndexService(indexPath, docsPath);
-            newIndexTask.start();
+            IndexService indexService = IndexService.getIndexServiceInstance(indexPath);
+            if(indexService.isStarted()){
+                IndexTask newTask = new IndexTask(indexService);
+                try {
+                    newTask.indexItem(docsPath);
+                }catch(Exception e){
+                    System.err.println("");
+                }
+            }
+            if(indexService.isStopped()){
+                indexService.start();
+            }
         }
 
 

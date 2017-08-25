@@ -26,7 +26,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 public final class LuceneIndexer implements Indexer {
     private IndexWriter writer = null;
     private Directory indexDirectory = null;
-    private Analyzer analyzer = null;
     private IndexWriterConfig iwc = null;
     private String indexDirPath = "";
 
@@ -34,9 +33,8 @@ public final class LuceneIndexer implements Indexer {
     public LuceneIndexer() {}
 
 
-    public LuceneIndexer(Directory indexDirectory, Analyzer analyzer, IndexWriterConfig iwc) {
+    public LuceneIndexer(Directory indexDirectory,  IndexWriterConfig iwc) {
         this.indexDirectory = indexDirectory;
-        this.analyzer = analyzer;
         this.iwc = iwc;
         createIndexWriter();
     }
@@ -49,22 +47,37 @@ public final class LuceneIndexer implements Indexer {
         }
     }
 
-    public void index(Item item) throws IOException{
+    /**
+     * Indexes the given item using the given writer, or if item is a directory,
+     * recurses over files and directories found under the given directory.
+     *
+     * @param item The item to be indexed
+     */
+
+    public boolean index(Item item) {
         Path path = Paths.get(item.getAbsolutePath());
-        if (Files.isDirectory(path)) {
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    try {
-                        indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
-                    } catch (IOException ignore) {
-                        // don't index files that can't be read.
+        try {
+            if (Files.isDirectory(path)) {
+                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        try {
+                            indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
+                        } catch (IOException ignore) {
+                            // don't index files that can't be read.
+                        }
+                        return FileVisitResult.CONTINUE;
                     }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } else {
-            indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
+                });
+            } else {
+                indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
+            }
+            item.setStatus(true);
+        }catch(Exception e){
+            //If exception occurs, set status to false
+            item.setStatus(false);
+        }finally{
+            return item.getStatus();
         }
     }
 

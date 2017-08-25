@@ -5,8 +5,8 @@ package main.java.com.codeant.common;
  */
 public abstract class Item{
     protected String absolutePath;
-    private boolean status = false;
-    private ItemType type;
+    private boolean indexed = false;
+    protected ItemType type;
 
     public void setAbsolutePath(String absolutePath){
         this.absolutePath = absolutePath;
@@ -17,14 +17,15 @@ public abstract class Item{
     }
 
     public void setStatus(boolean status){
-        this.status = status;
+        this.indexed = status;
     }
 
     public boolean getStatus(){
-        return this.status;
+        return this.indexed;
     }
 
     public void setType(ItemType type){
         this.type = type;
     }
+    public ItemType getType(){return type;}
 }
