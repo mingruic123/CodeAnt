@@ -54,31 +54,26 @@ public final class LuceneIndexer implements Indexer {
      * @param item The item to be indexed
      */
 
-    public boolean index(Item item) {
+    public void index(Item item) throws IOException{
         Path path = Paths.get(item.getAbsolutePath());
-        try {
-            if (Files.isDirectory(path)) {
-                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        try {
-                            indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
-                        } catch (IOException ignore) {
-                            // don't index files that can't be read.
-                        }
-                        return FileVisitResult.CONTINUE;
+
+        if (Files.isDirectory(path)) {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    try {
+                        indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
+                    } catch (IOException ignore) {
+                        // don't index files that can't be read.
                     }
-                });
-            } else {
-                indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
-            }
-            item.setStatus(true);
-        }catch(Exception e){
-            //If exception occurs, set status to false
-            item.setStatus(false);
-        }finally{
-            return item.getStatus();
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } else {
+            indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
         }
+        item.setStatus(true);
+
     }
 
     static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
